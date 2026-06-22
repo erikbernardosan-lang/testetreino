@@ -25,7 +25,6 @@
   <main class="w-full max-w-md h-screen bg-darkBg relative overflow-hidden shadow-2xl flex flex-col">
     
     <section id="tela-hoje" class="flex flex-col h-full overflow-y-auto pb-28">
-      
       <div class="flex bg-gray-900 p-2 gap-2 border-b border-gray-800">
         <button onclick="mudarTreino('A')" id="btn-treino-A" class="flex-1 py-2 font-bold rounded-lg transition bg-primary text-white">
           Treino A (Inferiores)
@@ -64,24 +63,23 @@
       </header>
 
       <div class="flex-1 flex flex-col items-center justify-center p-6">
-        <div class="w-44 h-44 bg-darkCard rounded-full flex items-center justify-center border-4 border-gray-700 mb-4 relative shadow-inner">
-           <span id="treino-icone" class="text-6xl">💪</span>
-           <svg class="absolute top-0 left-0 w-full h-full transform -rotate-90">
-             <circle cx="88" cy="88" r="84" stroke="transparent" stroke-width="4" fill="none" />
-             <circle cx="88" cy="88" r="84" stroke="#f97316" stroke-width="6" fill="none" stroke-dasharray="527" stroke-dashoffset="150" />
-           </svg>
+        
+        <p id="timer-estado" class="text-xs font-bold uppercase tracking-widest text-primary mb-2">Exercício</p>
+
+        <div class="w-52 h-52 bg-darkCard rounded-full flex flex-col items-center justify-center border-4 border-primary mb-4 relative shadow-inner">
+           <span id="timer-display" class="text-5xl font-black tracking-tight text-white">00:00</span>
+           <span id="treino-meta" class="text-sm font-semibold text-gray-400 mt-1">4 x 12</span>
         </div>
 
-        <h3 id="treino-meta" class="text-4xl font-bold mb-2 text-white">4 x 12</h3>
-        <p id="treino-objetivo" class="text-primary font-medium text-xs uppercase tracking-wider mb-2">Objetivo</p>
-        <p id="treino-dica" class="text-gray-300 text-center text-sm px-4 max-h-24 overflow-y-auto">Dica operacional aqui.</p>
+        <p id="treino-objetivo" class="text-gray-400 font-medium text-xs uppercase tracking-wider mb-2">Objetivo</p>
+        <p id="treino-dica" class="text-gray-300 text-center text-sm px-4 max-h-20 overflow-y-auto">Dica operacional aqui.</p>
         
         <div class="mt-6 flex items-center gap-6">
           <button onclick="exercicioAnterior()" class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:bg-gray-700">
             <i class="fa-solid fa-backward-step"></i>
           </button>
-          <button class="w-16 h-16 bg-primary hover:bg-orange-600 rounded-full flex items-center justify-center text-2xl shadow-lg shadow-orange-500/40">
-            <i class="fa-solid fa-pause"></i>
+          <button onclick="alternarPlayPause()" id="btn-play-pause" class="w-16 h-16 bg-primary hover:bg-orange-600 rounded-full flex items-center justify-center text-2xl shadow-lg shadow-orange-500/40">
+            <i id="icone-play-pause" class="fa-solid fa-pause"></i>
           </button>
           <button onclick="proximoExercicio()" class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:bg-gray-700">
             <i class="fa-solid fa-forward-step"></i>
@@ -100,7 +98,7 @@
             <input type="number" placeholder="8" max="10" class="bg-transparent w-12 text-right font-bold text-base outline-none text-white mr-2">
           </div>
         </div>
-        <button onclick="proximoExercicio()" class="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition-all text-lg shadow-md">
+        <button onclick="concluirSerie()" id="btn-acao-principal" class="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition-all text-lg shadow-md">
           Concluir Série
         </button>
       </div>
@@ -109,38 +107,42 @@
   </main>
 
   <script>
-    // Banco de Dados da sua Rotina Específica do Vôlei (Athletic 2001)
     const rotinas = {
       A: {
         titulo: "Treino A: Inferiores & Core",
         subtitulo: "Foco em Salto Vertical e Estabilidade",
         exercicios: [
-          { nome: "Bicicleta Ergométrica", meta: "10 min", obj: "Aquecimento", dica: "Velocidade constante para lubrificar as articulações dos joelhos.", icone: "🚴" },
-          { nome: "Agachamento (Meio Cursor)", meta: "4 x 12", obj: "Potência de Salto", dica: "Polia baixa com barra pequena. Faça a subida de forma explosiva!", icone: "⚡" },
-          { nome: "Extensão das Pernas", meta: "3 x 12-15", obj: "Proteção de Joelho", dica: "Cadeira extensora. Essencial para desaceleração e amortecimento de quedas.", icone: "🦵" },
-          { nome: "Flexão de Pernas", meta: "3 x 12 (Cada)", obj: "Prevenção de Lesão", dica: "Em pé no rolete. Fortalece os isquiotibiais e equilibra a articulação.", icone: "💪" },
-          { nome: "Bi-set: Abdutor + Adutor", meta: "3 x 15 (Cada)", obj: "Deslocamento Lateral", dica: "Caneleira na polia baixa. Execute uma série de adutor e mude direto para abdutor.", icone: "🔄" },
-          { nome: "Combo: Contração + Infra", meta: "3 x 20 (Cada)", obj: "Estabilidade do Core", dica: "Conjugado sem descanso. Core firme transfere energia para a cortada.", icone: "🔥" }
+          { nome: "Bicicleta Ergométrica", tipo: "tempo", tempo: 600, descanso: 0, obj: "Aquecimento", dica: "Velocidade constante para lubrificar as articulações dos joelhos.", meta: "10 min" },
+          { nome: "Agachamento (Meio Cursor)", tipo: "reps", tempo: 0, descanso: 60, obj: "Potência de Salto", dica: "Polia baixa com barra pequena. Faça a subida de forma explosiva!", meta: "4 x 12" },
+          { nome: "Extensão das Pernas", tipo: "reps", tempo: 0, descanso: 45, obj: "Proteção de Joelho", dica: "Cadeira extensora. Essencial para desaceleração e amortecimento de quedas.", meta: "3 x 12-15" },
+          { nome: "Flexão de Pernas", tipo: "reps", tempo: 0, descanso: 45, obj: "Prevenção de Lesão", dica: "Em pé no rolete. Fortalece os isquiotibiais e equilibra a articulação.", meta: "3 x 12 (Cada)" },
+          { nome: "Bi-set: Abdutor + Adutor", tipo: "reps", tempo: 0, descanso: 60, obj: "Deslocamento Lateral", dica: "Caneleira na polia baixa. Execute uma série de adutor e mude direto para abdutor.", meta: "3 x 15 (Cada)" },
+          { nome: "Combo: Contração + Infra", tipo: "reps", tempo: 0, descanso: 45, obj: "Estabilidade do Core", dica: "Conjugado sem descanso. Core firme transfere energia para a cortada.", meta: "3 x 20 (Cada)" }
         ]
       },
       B: {
         titulo: "Treino B: Superiores & Cardio",
         subtitulo: "Foco em Ataque, Bloqueio e Queima de Gordura",
         exercicios: [
-          { nome: "Puxador Alto Frente", meta: "4 x 10-12", obj: "Potência de Cortada", dica: "Polia alta, barra grande. Fortalece o grande dorsal para armar o golpe.", icone: "👐" },
-          { nome: "Supino Sentado", meta: "3 x 12", obj: "Força de Bloqueio/Ataque", dica: "Desenvolve peitoral e anterior de ombro para acelerar o braço na bola.", icone: "🏋️" },
-          { nome: "Desenvolvimento de Ombros", meta: "3 x 10", obj: "Suporte de Impacto", dica: "Pegadores horizontais. Protege o complexo do manguito rotador nos ataques.", icone: "🛡️" },
-          { nome: "Extensor de Braços (Tríceps)", meta: "3 x 12", obj: "Extensão de Toque/Ataque", dica: "Polia alta com barra pequena. Finalização potente do cotovelo.", icone: "💪" },
-          { nome: "Abdominal Lateral", meta: "3 x 15 (Cada)", obj: "Rotação de Tronco", dica: "Deslocamento lateral focado nos oblíquos. Essencial para o saque.", icone: "🔥" },
-          { nome: "Cardio Aeróbico: Scaler", meta: "20 min", obj: "Queima de Gordura", dica: "Ritmo constante moderado a intenso. Monitore batimentos entre 65% e 75% da Fcmáx.", icone: "🏃" }
+          { nome: "Puxador Alto Frente", tipo: "reps", tempo: 0, descanso: 60, obj: "Potência de Cortada", dica: "Polia alta, barra grande. Fortalece o grande dorsal para armar o golpe.", meta: "4 x 10-12" },
+          { nome: "Supino Sentado", tipo: "reps", tempo: 0, descanso: 60, obj: "Força de Bloqueio/Ataque", dica: "Desenvolve peitoral e anterior de ombro para acelerar o braço na bola.", meta: "3 x 12" },
+          { nome: "Desenvolvimento de Ombros", tipo: "reps", tempo: 0, descanso: 45, obj: "Suporte de Impacto", dica: "Pegadores horizontais. Protege o complexo do manguito rotador nos ataques.", meta: "3 x 10" },
+          { nome: "Extensor de Braços (Tríceps)", tipo: "reps", tempo: 0, descanso: 45, obj: "Extensão de Toque/Ataque", dica: "Polia alta com barra pequena. Finalização potente do cotovelo.", meta: "3 x 12" },
+          { nome: "Abdominal Lateral", tipo: "reps", tempo: 0, descanso: 45, obj: "Rotação de Tronco", dica: "Deslocamento lateral focado nos oblíquos. Essencial para o saque.", meta: "3 x 15 (Cada)" },
+          { nome: "Cardio Aeróbico: Scaler", tipo: "tempo", tempo: 1200, descanso: 0, obj: "Queima de Gordura", dica: "Ritmo constante moderado a intenso. Monitore batimentos entre 65% e 75% da Fcmáx.", meta: "20 min" }
         ]
       }
     };
 
     let treinoAtual = 'A';
     let indexExercicioAtual = 0;
+    
+    // Variáveis de controle do Cronômetro
+    let tempoRestante = 0;
+    let timerInterval = null;
+    let estáPausado = false;
+    let modoDescanso = false;
 
-    // Renderiza a lista de exercícios da Tela Inicial baseado no treino selecionado
     function renderizarLista() {
       const listaContainer = document.getElementById('lista-exercicios');
       const dados = rotinas[treinoAtual];
@@ -149,51 +151,114 @@
       document.getElementById('header-sub').innerHTML = `<i class="fa-regular fa-clock mr-1"></i> ${dados.subtitulo}`;
       
       listaContainer.innerHTML = '';
-      
       dados.exercicios.forEach((ex, idx) => {
+        let detalheTempo = ex.tipo === "tempo" ? `<span class="text-orange-400"><i class="fa-regular fa-clock"></i> Por Tempo</span>` : `Descanso: ${ex.descanso}s`;
         listaContainer.innerHTML += `
-          <div class="bg-darkCard p-4 rounded-xl flex items-center gap-4 border border-gray-700 hover:border-gray-600 transition">
-            <div class="w-14 h-14 bg-gray-800 rounded-lg flex items-center justify-center text-2xl">${ex.icone}</div>
+          <div class="bg-darkCard p-4 rounded-xl flex items-center gap-4 border border-gray-700">
+            <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-xl font-bold text-primary">${idx + 1}</div>
             <div class="flex-1">
               <h3 class="font-bold text-gray-100 text-sm">${ex.nome}</h3>
               <p class="text-xs text-gray-400 mt-0.5">${ex.meta} • <span class="text-gray-500">${ex.obj}</span></p>
+              <p class="text-[10px] text-primary mt-1 font-semibold uppercase tracking-wider">${detalheTempo}</p>
             </div>
-            <span class="text-xs bg-gray-800 px-2 py-1 rounded text-primary font-semibold">#${idx + 1}</span>
           </div>
         `;
       });
     }
 
-    // Alternar abas de treino A/B
     function mudarTreino(tipo) {
       treinoAtual = tipo;
-      const btnA = document.getElementById('btn-treino-A');
-      const btnB = document.getElementById('btn-treino-B');
-      
-      if(tipo === 'A') {
-        btnA.className = "flex-1 py-2 font-bold rounded-lg transition bg-primary text-white";
-        btnB.className = "flex-1 py-2 font-bold rounded-lg transition bg-gray-800 text-gray-400";
-      } else {
-        btnB.className = "flex-1 py-2 font-bold rounded-lg transition bg-primary text-white";
-        btnA.className = "flex-1 py-2 font-bold rounded-lg transition bg-gray-800 text-gray-400";
-      }
+      document.getElementById('btn-treino-A').className = tipo === 'A' ? "flex-1 py-2 font-bold rounded-lg transition bg-primary text-white" : "flex-1 py-2 font-bold rounded-lg transition bg-gray-800 text-gray-400";
+      document.getElementById('btn-treino-B').className = tipo === 'B' ? "flex-1 py-2 font-bold rounded-lg transition bg-primary text-white" : "flex-1 py-2 font-bold rounded-lg transition bg-gray-800 text-gray-400";
       renderizarLista();
     }
 
-    // Carrega dados do exercício atual no fluxo guiado
+    function formatarTempo(segundos) {
+      const mins = Math.floor(segundos / 60);
+      const segs = segundos % 60;
+      return `${mins.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
+    }
+
+    function gerenciarTimer() {
+      clearInterval(timerInterval);
+      if (tempoRestante <= 0) return;
+
+      timerInterval = setInterval(() => {
+        if (!estáPausado) {
+          tempoRestante--;
+          document.getElementById('timer-display').innerText = formatarTempo(tempoRestante);
+
+          if (tempoRestante <= 0) {
+            clearInterval(timerInterval);
+            if (modoDescanso) {
+              finalizarDescanso();
+            } else {
+              alert("Tempo do exercício concluído!");
+              proximoExercicio();
+            }
+          }
+        }
+      }, 1000);
+    }
+
     function atualizarTelaTreino() {
-      const lista = rotinas[treinoAtual].exercicios;
-      const ex = lista[indexExercicioAtual];
+      const ex = rotinas[treinoAtual].exercicios[indexExercicioAtual];
       
-      document.getElementById('treino-etapa').innerText = `Etapa ${indexExercicioAtual + 1}/${lista.length}`;
+      document.getElementById('treino-etapa').innerText = `Etapa ${indexExercicioAtual + 1}/${rotinas[treinoAtual].exercicios.length}`;
       document.getElementById('treino-nome-exercicio').innerText = ex.nome;
-      document.getElementById('treino-icone').innerText = ex.icone;
       document.getElementById('treino-meta').innerText = ex.meta;
       document.getElementById('treino-objetivo').innerText = ex.obj;
       document.getElementById('treino-dica').innerText = ex.dica;
+      
+      modoDescanso = false;
+      estáPausado = false;
+      document.getElementById('icone-play-pause').className = "fa-solid fa-pause";
+
+      if (ex.tipo === "tempo") {
+        document.getElementById('timer-estado').innerText = "Exercício em Andamento";
+        document.getElementById('timer-estado').className = "text-xs font-bold uppercase tracking-widest text-orange-400";
+        tempoRestante = ex.tempo;
+        document.getElementById('btn-acao-principal').innerText = "Avançar Exercício";
+        document.getElementById('btn-acao-principal').onclick = proximoExercicio;
+        gerenciarTimer();
+      } else {
+        document.getElementById('timer-estado').innerText = "Pronto para a Série";
+        document.getElementById('timer-estado').className = "text-xs font-bold uppercase tracking-widest text-green-400";
+        document.getElementById('timer-display').innerText = "GO!";
+        tempoRestante = 0;
+        document.getElementById('btn-acao-principal').innerText = "Concluir Série";
+        document.getElementById('btn-acao-principal').onclick = concluirSerie;
+        clearInterval(timerInterval);
+      }
     }
 
-    // Navegação do fluxo guiado
+    function alternarPlayPause() {
+      estáPausado = !estáPausado;
+      document.getElementById('icone-play-pause').className = estáPausado ? "fa-solid fa-play ml-1" : "fa-solid fa-pause";
+    }
+
+    function concluirSerie() {
+      const ex = rotinas[treinoAtual].exercicios[indexExercicioAtual];
+      if (ex.descanso > 0) {
+        modoDescanso = true;
+        estáPausado = false;
+        document.getElementById('timer-estado').innerText = "Descanso Ativo";
+        document.getElementById('timer-estado').className = "text-xs font-bold uppercase tracking-widest text-blue-400";
+        tempoRestante = ex.descanso;
+        document.getElementById('timer-display').innerText = formatarTempo(tempoRestante);
+        document.getElementById('btn-acao-principal').innerText = "Pular Descanso";
+        document.getElementById('btn-acao-principal').onclick = finalizarDescanso;
+        gerenciarTimer();
+      } else {
+        proximoExercicio();
+      }
+    }
+
+    function finalizarDescanso() {
+      clearInterval(timerInterval);
+      atualizarTelaTreino();
+    }
+
     function iniciarFluxoTreino() {
       indexExercicioAtual = 0;
       atualizarTelaTreino();
@@ -203,6 +268,7 @@
     }
 
     function voltarParaHoje() {
+      clearInterval(timerInterval);
       document.getElementById('tela-treino').classList.add('hidden');
       document.getElementById('tela-treino').classList.remove('flex');
       document.getElementById('tela-hoje').classList.remove('hidden');
@@ -214,7 +280,8 @@
         indexExercicioAtual++;
         atualizarTelaTreino();
       } else {
-        alert("Parabéns! Treino de Vôlei Concluído com sucesso na sua Athletic 2001!");
+        clearInterval(timerInterval);
+        alert("Parabéns! Excelente treino de vôlei concluído!");
         voltarParaHoje();
       }
     }
@@ -226,7 +293,6 @@
       }
     }
 
-    // Inicialização automática
     renderizarLista();
   </script>
 </body>
