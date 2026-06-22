@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vôlei Fit - Athletic 2001</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#f97316', 
+            darkBg: '#111827', 
+            darkCard: '#1f2937' 
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-black flex justify-center text-white antialiased">
+
+  <main class="w-full max-w-md h-screen bg-darkBg relative overflow-hidden shadow-2xl flex flex-col">
+    
+    <section id="tela-hoje" class="flex flex-col h-full overflow-y-auto pb-28">
+      
+      <div class="flex bg-gray-900 p-2 gap-2 border-b border-gray-800">
+        <button onclick="mudarTreino('A')" id="btn-treino-A" class="flex-1 py-2 font-bold rounded-lg transition bg-primary text-white">
+          Treino A (Inferiores)
+        </button>
+        <button onclick="mudarTreino('B')" id="btn-treino-B" class="flex-1 py-2 font-bold rounded-lg transition bg-gray-800 text-gray-400">
+          Treino B (Superiores)
+        </button>
+      </div>
+
+      <header class="p-6 bg-darkCard rounded-b-2xl shadow-md border-b border-gray-800">
+        <p class="text-gray-400 text-sm font-semibold uppercase tracking-wider">Performance Voleibol</p>
+        <h1 id="header-titulo" class="text-2xl font-bold mt-1 text-primary">Treino A: Membros Inferiores & Core</h1>
+        <p id="header-sub" class="text-sm text-gray-300 mt-2"><i class="fa-regular fa-clock mr-1"></i> Foco em Salto Vertical e Estabilidade</p>
+      </header>
+
+      <div id="lista-exercicios" class="p-6 flex-1 flex flex-col gap-4"></div>
+
+      <div class="fixed bottom-0 w-full max-w-md p-6 bg-gradient-to-t from-darkBg via-darkBg to-transparent">
+        <button onclick="iniciarFluxoTreino()" class="w-full bg-primary hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/30 transition-all text-lg">
+          Iniciar Treino
+        </button>
+      </div>
+    </section>
+
+    <section id="tela-treino" class="hidden flex-col h-full">
+      
+      <header class="p-6 flex items-center justify-between border-b border-gray-800">
+        <button onclick="voltarParaHoje()" class="text-gray-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <div class="text-center">
+          <p id="treino-etapa" class="text-xs text-gray-400 uppercase tracking-widest">Etapa 1/6</p>
+          <h2 id="treino-nome-exercicio" class="font-bold text-lg text-gray-100">Nome do Exercício</h2>
+        </div>
+        <button onclick="proximoExercicio()" class="text-primary hover:text-orange-400 font-semibold text-sm">Pular</button>
+      </header>
+
+      <div class="flex-1 flex flex-col items-center justify-center p-6">
+        <div class="w-44 h-44 bg-darkCard rounded-full flex items-center justify-center border-4 border-gray-700 mb-4 relative shadow-inner">
+           <span id="treino-icone" class="text-6xl">💪</span>
+           <svg class="absolute top-0 left-0 w-full h-full transform -rotate-90">
+             <circle cx="88" cy="88" r="84" stroke="transparent" stroke-width="4" fill="none" />
+             <circle cx="88" cy="88" r="84" stroke="#f97316" stroke-width="6" fill="none" stroke-dasharray="527" stroke-dashoffset="150" />
+           </svg>
+        </div>
+
+        <h3 id="treino-meta" class="text-4xl font-bold mb-2 text-white">4 x 12</h3>
+        <p id="treino-objetivo" class="text-primary font-medium text-xs uppercase tracking-wider mb-2">Objetivo</p>
+        <p id="treino-dica" class="text-gray-300 text-center text-sm px-4 max-h-24 overflow-y-auto">Dica operacional aqui.</p>
+        
+        <div class="mt-6 flex items-center gap-6">
+          <button onclick="exercicioAnterior()" class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:bg-gray-700">
+            <i class="fa-solid fa-backward-step"></i>
+          </button>
+          <button class="w-16 h-16 bg-primary hover:bg-orange-600 rounded-full flex items-center justify-center text-2xl shadow-lg shadow-orange-500/40">
+            <i class="fa-solid fa-pause"></i>
+          </button>
+          <button onclick="proximoExercicio()" class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-gray-300 hover:bg-gray-700">
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-6 bg-darkCard rounded-t-2xl border-t border-gray-800">
+        <div class="flex gap-4 mb-4">
+          <div class="flex-1 bg-gray-800 rounded-lg p-2 flex items-center justify-between border border-gray-700">
+            <span class="text-xs text-gray-400 ml-2">Carga (kg)</span>
+            <input type="number" placeholder="0" class="bg-transparent w-16 text-right font-bold text-base outline-none text-white mr-2">
+          </div>
+          <div class="flex-1 bg-gray-800 rounded-lg p-2 flex items-center justify-between border border-gray-700">
+            <span class="text-xs text-gray-400 ml-2">RPE (1-10)</span>
+            <input type="number" placeholder="8" max="10" class="bg-transparent w-12 text-right font-bold text-base outline-none text-white mr-2">
+          </div>
+        </div>
+        <button onclick="proximoExercicio()" class="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition-all text-lg shadow-md">
+          Concluir Série
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Banco de Dados da sua Rotina Específica do Vôlei (Athletic 2001)
+    const rotinas = {
+      A: {
+        titulo: "Treino A: Inferiores & Core",
+        subtitulo: "Foco em Salto Vertical e Estabilidade",
+        exercicios: [
+          { nome: "Bicicleta Ergométrica", meta: "10 min", obj: "Aquecimento", dica: "Velocidade constante para lubrificar as articulações dos joelhos.", icone: "🚴" },
+          { nome: "Agachamento (Meio Cursor)", meta: "4 x 12", obj: "Potência de Salto", dica: "Polia baixa com barra pequena. Faça a subida de forma explosiva!", icone: "⚡" },
+          { nome: "Extensão das Pernas", meta: "3 x 12-15", obj: "Proteção de Joelho", dica: "Cadeira extensora. Essencial para desaceleração e amortecimento de quedas.", icone: "🦵" },
+          { nome: "Flexão de Pernas", meta: "3 x 12 (Cada)", obj: "Prevenção de Lesão", dica: "Em pé no rolete. Fortalece os isquiotibiais e equilibra a articulação.", icone: "💪" },
+          { nome: "Bi-set: Abdutor + Adutor", meta: "3 x 15 (Cada)", obj: "Deslocamento Lateral", dica: "Caneleira na polia baixa. Execute uma série de adutor e mude direto para abdutor.", icone: "🔄" },
+          { nome: "Combo: Contração + Infra", meta: "3 x 20 (Cada)", obj: "Estabilidade do Core", dica: "Conjugado sem descanso. Core firme transfere energia para a cortada.", icone: "🔥" }
+        ]
+      },
+      B: {
+        titulo: "Treino B: Superiores & Cardio",
+        subtitulo: "Foco em Ataque, Bloqueio e Queima de Gordura",
+        exercicios: [
+          { nome: "Puxador Alto Frente", meta: "4 x 10-12", obj: "Potência de Cortada", dica: "Polia alta, barra grande. Fortalece o grande dorsal para armar o golpe.", icone: "👐" },
+          { nome: "Supino Sentado", meta: "3 x 12", obj: "Força de Bloqueio/Ataque", dica: "Desenvolve peitoral e anterior de ombro para acelerar o braço na bola.", icone: "🏋️" },
+          { nome: "Desenvolvimento de Ombros", meta: "3 x 10", obj: "Suporte de Impacto", dica: "Pegadores horizontais. Protege o complexo do manguito rotador nos ataques.", icone: "🛡️" },
+          { nome: "Extensor de Braços (Tríceps)", meta: "3 x 12", obj: "Extensão de Toque/Ataque", dica: "Polia alta com barra pequena. Finalização potente do cotovelo.", icone: "💪" },
+          { nome: "Abdominal Lateral", meta: "3 x 15 (Cada)", obj: "Rotação de Tronco", dica: "Deslocamento lateral focado nos oblíquos. Essencial para o saque.", icone: "🔥" },
+          { nome: "Cardio Aeróbico: Scaler", meta: "20 min", obj: "Queima de Gordura", dica: "Ritmo constante moderado a intenso. Monitore batimentos entre 65% e 75% da Fcmáx.", icone: "🏃" }
+        ]
+      }
+    };
+
+    let treinoAtual = 'A';
+    let indexExercicioAtual = 0;
+
+    // Renderiza a lista de exercícios da Tela Inicial baseado no treino selecionado
+    function renderizarLista() {
+      const listaContainer = document.getElementById('lista-exercicios');
+      const dados = rotinas[treinoAtual];
+      
+      document.getElementById('header-titulo').innerText = dados.titulo;
+      document.getElementById('header-sub').innerHTML = `<i class="fa-regular fa-clock mr-1"></i> ${dados.subtitulo}`;
+      
+      listaContainer.innerHTML = '';
+      
+      dados.exercicios.forEach((ex, idx) => {
+        listaContainer.innerHTML += `
+          <div class="bg-darkCard p-4 rounded-xl flex items-center gap-4 border border-gray-700 hover:border-gray-600 transition">
+            <div class="w-14 h-14 bg-gray-800 rounded-lg flex items-center justify-center text-2xl">${ex.icone}</div>
+            <div class="flex-1">
+              <h3 class="font-bold text-gray-100 text-sm">${ex.nome}</h3>
+              <p class="text-xs text-gray-400 mt-0.5">${ex.meta} • <span class="text-gray-500">${ex.obj}</span></p>
+            </div>
+            <span class="text-xs bg-gray-800 px-2 py-1 rounded text-primary font-semibold">#${idx + 1}</span>
+          </div>
+        `;
+      });
+    }
+
+    // Alternar abas de treino A/B
+    function mudarTreino(tipo) {
+      treinoAtual = tipo;
+      const btnA = document.getElementById('btn-treino-A');
+      const btnB = document.getElementById('btn-treino-B');
+      
+      if(tipo === 'A') {
+        btnA.className = "flex-1 py-2 font-bold rounded-lg transition bg-primary text-white";
+        btnB.className = "flex-1 py-2 font-bold rounded-lg transition bg-gray-800 text-gray-400";
+      } else {
+        btnB.className = "flex-1 py-2 font-bold rounded-lg transition bg-primary text-white";
+        btnA.className = "flex-1 py-2 font-bold rounded-lg transition bg-gray-800 text-gray-400";
+      }
+      renderizarLista();
+    }
+
+    // Carrega dados do exercício atual no fluxo guiado
+    function atualizarTelaTreino() {
+      const lista = rotinas[treinoAtual].exercicios;
+      const ex = lista[indexExercicioAtual];
+      
+      document.getElementById('treino-etapa').innerText = `Etapa ${indexExercicioAtual + 1}/${lista.length}`;
+      document.getElementById('treino-nome-exercicio').innerText = ex.nome;
+      document.getElementById('treino-icone').innerText = ex.icone;
+      document.getElementById('treino-meta').innerText = ex.meta;
+      document.getElementById('treino-objetivo').innerText = ex.obj;
+      document.getElementById('treino-dica').innerText = ex.dica;
+    }
+
+    // Navegação do fluxo guiado
+    function iniciarFluxoTreino() {
+      indexExercicioAtual = 0;
+      atualizarTelaTreino();
+      document.getElementById('tela-hoje').classList.add('hidden');
+      document.getElementById('tela-treino').classList.remove('hidden');
+      document.getElementById('tela-treino').classList.add('flex');
+    }
+
+    function voltarParaHoje() {
+      document.getElementById('tela-treino').classList.add('hidden');
+      document.getElementById('tela-treino').classList.remove('flex');
+      document.getElementById('tela-hoje').classList.remove('hidden');
+    }
+
+    function proximoExercicio() {
+      const lista = rotinas[treinoAtual].exercicios;
+      if (indexExercicioAtual < lista.length - 1) {
+        indexExercicioAtual++;
+        atualizarTelaTreino();
+      } else {
+        alert("Parabéns! Treino de Vôlei Concluído com sucesso na sua Athletic 2001!");
+        voltarParaHoje();
+      }
+    }
+
+    function exercicioAnterior() {
+      if (indexExercicioAtual > 0) {
+        indexExercicioAtual--;
+        atualizarTelaTreino();
+      }
+    }
+
+    // Inicialização automática
+    renderizarLista();
+  </script>
+</body>
+</html>
