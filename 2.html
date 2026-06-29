@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitLife Tracker - Studio Premium</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#db2777', // Rosa Fitness Premium
+            primaryHover: '#be185d',
+            darkBg: '#0f172a', 
+            darkCard: '#1e293b',
+            darkSurface: '#334155'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Esconder scrollbars visuais mantendo funcionalidade */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-black flex justify-center text-white antialiased font-sans select-none">
+
+  <main class="w-full max-w-md h-screen bg-darkBg relative overflow-hidden shadow-2xl flex flex-col border-x border-gray-800">
+    
+    <section id="tela-hoje" class="flex flex-col h-full overflow-y-auto pb-32 no-scrollbar">
+      <div class="flex bg-slate-900 p-2 gap-2 border-b border-slate-800 sticky top-0 z-10">
+        <button onclick="mudarTreino('A')" id="btn-treino-A" class="flex-1 py-3 font-bold rounded-xl transition-all bg-primary text-white shadow-lg">
+          Treino A <span class="block text-[10px] font-normal opacity-90">Superiores + Abs</span>
+        </button>
+        <button onclick="mudarTreino('B')" id="btn-treino-B" class="flex-1 py-3 font-bold rounded-xl transition-all bg-slate-800 text-slate-400">
+          Treino B <span class="block text-[10px] font-normal opacity-60">Inferiores + Glúteos</span>
+        </button>
+      </div>
+
+      <header class="p-5 bg-darkCard rounded-b-2xl shadow-md border-b border-slate-700/50">
+        <div class="flex justify-between items-center mb-3">
+          <div>
+            <span class="text-xs bg-pink-500/10 text-pink-400 px-2 py-1 rounded-full font-semibold border border-pink-500/20">Meta: Definição & Saúde</span>
+            <h1 id="header-titulo" class="text-xl font-bold mt-2 text-white">Treino A: Membros Superiores</h1>
+          </div>
+          <div class="text-right">
+            <span class="text-[11px] text-slate-400 block">Último treino:</span>
+            <span id="txt-ultimo-treino" class="text-xs font-bold text-primary">Nenhum registrado</span>
+          </div>
+        </div>
+        <p id="header-sub" class="text-xs text-slate-300 leading-relaxed"><i class="fa-solid fa-bullseye text-primary mr-1"></i> Foco em queima calórica e ganho de massa magra.</p>
+      </header>
+
+      <div class="p-5 flex-1 flex flex-col gap-3">
+        <h2 class="text-xs font-bold tracking-wider text-slate-400 uppercase mb-1">Roteiro do Exercícios</h2>
+        <div id="lista-exercicios" class="flex flex-col gap-3"></div>
+      </div>
+
+      <div class="mx-5 mb-4 p-4 bg-slate-900/80 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-2">
+        <h4 class="font-bold text-white text-xs uppercase text-pink-400 flex items-center gap-1">
+          <i class="fa-solid fa-circle-info"></i> Diretrizes Importantes
+        </h4>
+        <p><strong class="text-white">Aquecimento:</strong> 5 a 10 min de bicicleta obrigatórios antes de iniciar.</p>
+        <p><strong class="text-white">Zona Cardio Alvo:</strong> Manter entre 65% a 75% da Frequência Cardíaca Máxima.</p>
+        <p><strong class="text-white">Carga:</strong> Ajuste para falhar entre 10 a 15 repetições mantendo a postura.</p>
+        <p><strong class="text-white">Alongamento:</strong> Execute de 5 a 10 min ao final de toda a sessão.</p>
+      </div>
+
+      <div class="fixed bottom-0 w-full max-w-md p-5 bg-gradient-to-t from-darkBg via-darkBg to-transparent z-10">
+        <button onclick="iniciarFluxoTreino()" class="w-full bg-primary hover:bg-primaryHover text-white font-bold py-4 rounded-2xl shadow-xl shadow-pink-500/20 transition-all text-base uppercase tracking-wider flex items-center justify-center gap-2">
+          <i class="fa-solid fa-play text-sm"></i> Iniciar Treino de Hoje
+        </button>
+      </div>
+    </section>
+
+    <section id="tela-treino" class="hidden flex-col h-full overflow-y-auto pb-6 no-scrollbar">
+      
+      <header class="p-4 flex items-center justify-between border-b border-slate-800 bg-slate-900/50">
+        <button onclick="voltarParaHoje()" class="text-slate-400 hover:text-white w-8 h-8 flex items-center justify-center rounded-full bg-slate-800">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+        <div class="text-center flex-1 mx-4">
+          <p id="treino-etapa" class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">EXERCÍCIO 1/6</p>
+          <h2 id="treino-nome-exercicio" class="font-bold text-base text-white truncate max-w-[200px] mx-auto">Nome do Exercício</h2>
+        </div>
+        <button onclick="proximoExercicio()" class="text-pink-400 font-bold text-xs bg-pink-500/10 px-3 py-1.5 rounded-lg border border-pink-500/20">Pular</button>
+      </header>
+
+      <div class="w-full bg-slate-800 h-1.5">
+        <div id="barra-progresso" class="bg-primary h-1.5 transition-all duration-300" style="width: 0%"></div>
+      </div>
+
+      <div class="flex-1 flex flex-col items-center justify-center p-6 my-auto">
+        
+        <span id="timer-estado" class="text-[11px] font-bold uppercase tracking-widest text-primary bg-pink-500/10 px-3 py-1 rounded-full mb-4 border border-pink-500/10">Série em Andamento</span>
+
+        <div class="w-48 h-48 bg-darkCard rounded-full flex flex-col items-center justify-center border-4 border-primary mb-5 relative shadow-2xl transition-all duration-300" id="timer-ring">
+           <span id="timer-display" class="text-4xl font-black tracking-tight text-white">GO!</span>
+           <span id="treino-meta" class="text-xs font-semibold text-slate-400 mt-1 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">3 x 12-15</span>
+           <span id="lbl-serie-atual" class="text-[10px] uppercase font-bold text-pink-400 mt-1">Série 1</span>
+        </div>
+
+        <p class="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-1">Foco Técnico</p>
+        <p id="treino-objetivo" class="text-white font-semibold text-xs bg-slate-900 px-3 py-1 rounded-full mb-3 text-center">Objetivo</p>
+        <p id="treino-dica" class="text-slate-300 text-center text-xs px-4 max-h-24 overflow-y-auto leading-relaxed border-l-2 border-primary/30 italic">Dica operacional aqui.</p>
+        
+        <div class="mt-6 flex items-center gap-5">
+          <button onclick="exercicioAnterior()" class="w-11 h-11 bg-slate-800 rounded-full flex items-center justify-center text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+            <i class="fa-solid fa-backward-step"></i>
+          </button>
+          <button onclick="alternarPlayPause()" id="btn-play-pause" class="w-14 h-14 bg-primary hover:bg-primaryHover rounded-full flex items-center justify-center text-xl shadow-lg shadow-pink-500/30 transition">
+            <i id="icone-play-pause" class="fa-solid fa-pause"></i>
+          </button>
+          <button onclick="proximoExercicio()" class="w-11 h-11 bg-slate-800 rounded-full flex items-center justify-center text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-5 bg-darkCard rounded-t-3xl border-t border-slate-800 mt-auto shadow-2xl">
+        <div id="container-inputs-series" class="flex gap-3 mb-4">
+          <div class="flex-1 bg-slate-900 rounded-xl p-3 flex items-center justify-between border border-slate-800">
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold text-slate-400 uppercase">Carga</span>
+              <span class="text-[9px] text-slate-500">Peso atual (kg)</span>
+            </div>
+            <input id="input-carga" type="number" placeholder="0" min="0" class="bg-transparent w-16 text-right font-bold text-lg outline-none text-white border-b border-slate-700 focus:border-primary pr-1">
+          </div>
+          <div class="flex-1 bg-slate-900 rounded-xl p-3 flex items-center justify-between border border-slate-800">
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold text-slate-400 uppercase">Esforço RPE</span>
+              <span class="text-[9px] text-slate-500">Escala (1-10)</span>
+            </div>
+            <input id="input-rpe" type="number" placeholder="8" min="1" max="10" class="bg-transparent w-12 text-right font-bold text-lg outline-none text-white border-b border-slate-700 focus:border-primary pr-1">
+          </div>
+        </div>
+        
+        <button onclick="concluirAcaoPrincipal()" id="btn-acao-principal" class="w-full bg-white text-slate-950 font-bold py-4 rounded-xl hover:bg-slate-100 transition-all text-base uppercase tracking-wider shadow-md">
+          Concluir Série 1
+        </button>
+      </div>
+    </section>
+
+    <section id="tela-finalizador" class="hidden flex-col h-full justify-center p-6 text-center">
+      <div class="w-20 h-20 bg-pink-500/10 text-primary border border-pink-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 animate-bounce">
+        <i class="fa-solid fa-flag-checkered"></i>
+      </div>
+      <h2 class="text-2xl font-black text-white">Quase lá!</h2>
+      <p class="text-slate-300 text-sm mt-2 max-w-xs mx-auto">Sua rotina principal terminou. Escolha um bloco de cardio complementar para fechar com chave de ouro:</p>
+      
+      <div class="flex flex-col gap-4 mt-8 w-full">
+        <button onclick="escolherFinalizador('Scaler')" class="bg-darkCard hover:bg-slate-800 p-5 rounded-2xl border border-slate-700 text-left flex items-center justify-between transition-all group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-pink-500/10 text-primary rounded-xl flex items-center justify-center text-xl group-hover:bg-primary group-hover:text-white transition-all">
+              <i class="fa-solid fa-person-walking-arrow-loop-left"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-white">Scaler Aeróbico</h4>
+              <p class="text-xs text-slate-400 mt-0.5">15 a 20 minutos constantes</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500"></i>
+        </button>
+
+        <button onclick="escolherFinalizador('Bicicleta')" class="bg-darkCard hover:bg-slate-800 p-5 rounded-2xl border border-slate-700 text-left flex items-center justify-between transition-all group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-pink-500/10 text-primary rounded-xl flex items-center justify-center text-xl group-hover:bg-primary group-hover:text-white transition-all">
+              <i class="fa-solid fa-bicycle"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-white">Bicicleta Ergométrica</h4>
+              <p class="text-xs text-slate-400 mt-0.5">15 a 20 minutos contínuos</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500"></i>
+        </button>
+
+        <button onclick="pularFinalizador()" class="text-slate-400 hover:text-white font-bold text-xs uppercase mt-4 tracking-wider">
+          Pular e Encerrar Treino
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Definição Completa das Rotinas baseadas nas especificações e equipamento Athletic 2001 Avant
+    const rotinas = {
+      A: {
+        titulo: "Treino A: Superiores & Abs",
+        subtitulo: "Foco em queima calórica, tônus nos braços, costas e abdômen.",
+        exercicios: [
+          { nome: "Supino Sentado", tipo: "reps", series: 3, meta: "3 x 12-15", obj: "Peitoral & Braços", dica: "Empurre os pegadores para frente sem travar completamente os cotovelos.", descanso: 50 },
+          { nome: "Puxador Alto Frente", tipo: "reps", series: 3, meta: "3 x 12-15", obj: "Dorsais / Costas", dica: "Puxe a barra em direção ao peito superior controlando a subida.", descanso: 50 },
+          { nome: "Scaler Intervalado", tipo: "tempo", tempo: 600, series: 1, meta: "10 min", obj: "Aceleração Metabólica", dica: "Alterne: 1 min ritmo rápido / 1 min ritmo lento. FC alvo: 112 a 130 BPM.", descanso: 0 },
+          { nome: "Desenvolvimento de Ombros", tipo: "reps", series: 3, meta: "3 x 12", obj: "Ombros Definidos", dica: "Mantenha o alinhamento da coluna apoiada no banco.", descanso: 45 },
+          { nome: "Tríceps na Polia Alta", tipo: "reps", series: 3, meta: "3 x 12-15", obj: "Firmeza nos Braços", dica: "Mantenha os cotovelos fixados bem próximos ao corpo durante a extensão.", descanso: 45 },
+          { nome: "Abdominal Crunch na Polia", tipo: "reps", series: 3, meta: "3 x 15-20", obj: "Fortalecimento de Core", dica: "Abaixe o tronco concentrando totalmente a força no abdômen.", descanso: 45 }
+        ]
+      },
+      B: {
+        titulo: "Treino B: Inferiores & Glúteos",
+        subtitulo: "Foco em tonificação de pernas, glúteos e aumento de gasto energético.",
+        exercicios: [
+          { nome: "Extensão de Pernas", tipo: "reps", series: 3, meta: "3 x 12-15", obj: "Quadríceps / Coxas", dica: "Estenda as pernas na cadeira extensora e retorne de forma controlada.", descanso: 50 },
+          { nome: "Bicicleta Intervalada", tipo: "tempo", tempo: 600, series: 1, meta: "10 min", obj: "Resistência & Queima", dica: "Ciclo: 2 min com maior resistência (subida) / 2 min rápido menor resistência.", descanso: 0 },
+          { nome: "Coice de Glúteo na Polia", tipo: "reps", series: 3, meta: "3 x 12-15 (Perna)", obj: "Glúteos Isolado", dica: "Polia baixa conectada ao tornozelo. Faça a extensão para trás sem mover o tronco.", descanso: 45 },
+          { nome: "Remada Alta em Pé", tipo: "reps", series: 3, meta: "3 x 12", obj: "Ombros & Trapézio", dica: "Puxe a barra até a altura do peito, elevando os cotovelos lateralmente.", descanso: 50 },
+          { nome: "Abdominal Infra no Banco", tipo: "reps", series: 3, meta: "3 x 15", obj: "Abdômen Inferior", dica: "Eleve as pernas concentrando o movimento na porção inferior do abdômen.", descanso: 45 }
+        ]
+      }
+    };
+
+    let treinoAtual = 'A';
+    let indexExercicioAtual = 0;
+    let serieAtual = 1;
+    
+    // Variáveis de gerenciamento do Cronômetro
+    let tempoRestante = 0;
+    let timerInterval = null;
+    let estaPausado = false;
+    let modoDescanso = false;
+
+    // Inicialização do LocalStorage para salvar último treino
+    function carregarHistorico() {
+      const salvo = localStorage.getItem('ultimo_treino_fitlife');
+      if (salvo) {
+        document.getElementById('txt-ultimo-treino').innerText = salvo;
+      }
+    }
+
+    function salvarFimTreino() {
+      const data = new Date();
+      const formatada = `${data.getDate().toString().padStart(2,'0')}/${(data.getMonth()+1).toString().padStart(2,'0')} às ${data.getHours().toString().padStart(2,'0')}:${data.getMinutes().toString().padStart(2,'0')}`;
+      localStorage.setItem('ultimo_treino_fitlife', formatada);
+      carregarHistorico();
+    }
+
+    function renderizarLista() {
+      const listaContainer = document.getElementById('lista-exercicios');
+      const dados = rotinas[treinoAtual];
+      
+      document.getElementById('header-titulo').innerText = dados.titulo;
+      document.getElementById('header-sub').innerHTML = `<i class="fa-solid fa-bullseye text-primary mr-1"></i> ${dados.subtitulo}`;
+      
+      listaContainer.innerHTML = '';
+      dados.exercicios.forEach((ex, idx) => {
+        let iconeTipo = ex.tipo === "tempo" ? '<i class="fa-regular fa-clock text-pink-400"></i> Cardio por Tempo' : `<i class="fa-solid fa-dumbbell text-slate-500"></i> Musculação`;
+        listaContainer.innerHTML += `
+          <div class="bg-darkCard p-4 rounded-xl flex items-center gap-4 border border-slate-800 shadow-sm">
+            <div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-sm font-black text-primary border border-slate-700">${idx + 1}</div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-white text-sm truncate">${ex.nome}</h3>
+              <p class="text-xs text-slate-400 mt-0.5">${ex.meta} • <span class="text-slate-500 font-medium">${ex.obj}</span></p>
+              <p class="text-[10px] text-pink-400 mt-1 font-bold uppercase tracking-wider flex items-center gap-1">${iconeTipo}</p>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function mudarTreino(tipo) {
+      treinoAtual = tipo;
+      document.getElementById('btn-treino-A').className = tipo === 'A' ? "flex-1 py-3 font-bold rounded-xl transition-all bg-primary text-white shadow-lg shadow-pink-500/10" : "flex-1 py-3 font-bold rounded-xl transition-all bg-slate-800 text-slate-400";
+      document.getElementById('btn-treino-B').className = tipo === 'B' ? "flex-1 py-3 font-bold rounded-xl transition-all bg-primary text-white shadow-lg shadow-pink-500/10" : "flex-1 py-3 font-bold rounded-xl transition-all bg-slate-800 text-slate-400";
+      renderizarLista();
+    }
+
+    function formatarTempo(segundos) {
+      const mins = Math.floor(segundos / 60);
+      const segs = segundos % 60;
+      return `${mins.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
+    }
+
+    function gerenciarTimer() {
+      clearInterval(timerInterval);
+      if (tempoRestante <= 0) return;
+
+      timerInterval = setInterval(() => {
+        if (!estaPausado) {
+          tempoRestante--;
+          document.getElementById('timer-display').innerText = formatarTempo(tempoRestante);
+
+          if (tempoRestante <= 0) {
+            clearInterval(timerInterval);
+            if (modoDescanso) {
+              finalizarDescanso();
+            } else {
+              alert("Bloco de cardio concluído com sucesso!");
+              proximoExercicio();
+            }
+          }
+        }
+      }, 1000);
+    }
+
+    function atualizarTelaTreino() {
+      const listaEx = rotinas[treinoAtual].exercicios;
+      const ex = listaEx[indexExercicioAtual];
+      
+      // Atualizar progresso visual (barra e etapas)
+      const porcProgresso = ((indexExercicioAtual) / listaEx.length) * 180;
+      document.getElementById('barra-progresso').style.width = `${Math.max((indexExercicioAtual / listaEx.length) * 100, 5)}%`;
+      
+      document.getElementById('treino-etapa').innerText = `EXERCÍCIO ${indexExercicioAtual + 1}/${listaEx.length}`;
+      document.getElementById('treino-nome-exercicio').innerText = ex.nome;
+      document.getElementById('treino-meta').innerText = ex.meta;
+      document.getElementById('treino-objetivo').innerText = ex.obj;
+      document.getElementById('treino-dica').innerText = ex.dica;
+      
+      // Reset de Inputs de Carga e RPE
+      document.getElementById('input-carga').value = '';
+      document.getElementById('input-rpe').value = '';
+
+      modoDescanso = false;
+      estaPausado = false;
+      document.getElementById('icone-play-pause').className = "fa-solid fa-pause";
+      document.getElementById('timer-ring').className = "w-48 h-48 bg-darkCard rounded-full flex flex-col items-center justify-center border-4 border-primary mb-5 relative shadow-2xl transition-all duration-300";
+
+      if (ex.tipo === "tempo") {
+        // Layout para Exercício de Cardio por tempo
+        document.getElementById('timer-estado').innerText = "Cardio em Execução";
+        document.getElementById('timer-estado').className = "text-[11px] font-bold uppercase tracking-widest text-pink-400 bg-pink-500/10 px-3 py-1 rounded-full mb-4 border border-pink-500/20";
+        document.getElementById('lbl-serie-atual').innerText = "Cronômetro Ativo";
+        document.getElementById('container-inputs-series').classList.add('opacity-40');
+        
+        tempoRestante = ex.tempo;
+        document.getElementById('timer-display').innerText = formatarTempo(tempoRestante);
+        document.getElementById('btn-acao-principal').innerText = "Avançar Próximo Exercício";
+        gerenciarTimer();
+      } else {
+        // Layout para Exercício de Força por Repetições
+        document.getElementById('timer-estado').innerText = "Série em Andamento";
+        document.getElementById('timer-estado').className = "text-[11px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full mb-4 border border-emerald-500/20";
+        document.getElementById('lbl-serie-atual').innerText = `Série ${serieAtual} de ${ex.series}`;
+        document.getElementById('container-inputs-series').classList.remove('opacity-40');
+        
+        document.getElementById('timer-display').innerText = "GO!";
+        tempoRestante = 0;
+        document.getElementById('btn-acao-principal').innerText = `Concluir Série ${serieAtual}`;
+        clearInterval(timerInterval);
+      }
+    }
+
+    function alternarPlayPause() {
+      estaPausado = !estaPausado;
+      document.getElementById('icone-play-pause').className = estaPausado ? "fa-solid fa-play ml-1" : "fa-solid fa-pause";
+    }
+
+    function concluirAcaoPrincipal() {
+      const ex = rotinas[treinoAtual].exercicios[indexExercicioAtual];
+      
+      if (ex.tipo === "tempo" || modoDescanso) {
+        // Se estiver no tempo ou descanso, o botão pula direto
+        if (modoDescanso) {
+          finalizarDescanso();
+        } else {
+          proximoExercicio();
+        }
+        return;
+      }
+
+      // Lógica de avanço de séries da Musculação
+      if (serieAtual < ex.series) {
+        // Ativar contador de descanso entre as séries
+        modoDescanso = true;
+        estaPausado = false;
+        document.getElementById('timer-estado').innerText = "Descanso Ativo";
+        document.getElementById('timer-estado').className = "text-[11px] font-bold uppercase tracking-widest text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full mb-4 border border-cyan-500/20";
+        document.getElementById('timer-ring').className = "w-48 h-48 bg-darkCard rounded-full flex flex-col items-center justify-center border-4 border-cyan-400 mb-5 relative shadow-2xl transition-all duration-300";
+        
+        tempoRestante = ex.descanso;
+        document.getElementById('timer-display').innerText = formatarTempo(tempoRestante);
+        document.getElementById('btn-acao-principal').innerText = "Pular Descanso";
+        gerenciarTimer();
+      } else {
+        // Se fechou todas as séries deste exercício, avança de exercício
+        serieAtual = 1;
+        proximoExercicio();
+      }
+    }
+
+    function finalizarDescanso() {
+      clearInterval(timerInterval);
+      serieAtual++;
+      atualizarTelaTreino();
+    }
+
+    function iniciarFluxoTreino() {
+      indexExercicioAtual = 0;
+      serieAtual = 1;
+      atualizarTelaTreino();
+      document.getElementById('tela-hoje').classList.add('hidden');
+      document.getElementById('tela-treino').classList.remove('hidden');
+    }
+
+    function voltarParaHoje() {
+      clearInterval(timerInterval);
+      document.getElementById('tela-treino').classList.add('hidden');
+      document.getElementById('tela-finalizador').classList.add('hidden');
+      document.getElementById('tela-hoje').classList.remove('hidden');
+    }
+
+    function proximoExercicio() {
+      const lista = rotinas[treinoAtual].exercicios;
+      if (indexExercicioAtual < lista.length - 1) {
+        indexExercicioAtual++;
+        serieAtual = 1;
+        atualizarTelaTreino();
+      } else {
+        // Chegou ao fim da rotina principal -> Vai para tela de Finalizador
+        clearInterval(timerInterval);
+        document.getElementById('tela-treino').classList.add('hidden');
+        document.getElementById('tela-finalizador').classList.remove('hidden');
+        document.getElementById('tela-finalizador').classList.add('flex');
+      }
+    }
+
+    function exercicioAnterior() {
+      if (indexExercicioAtual > 0) {
+        indexExercicioAtual--;
+        serieAtual = 1;
+        atualizarTelaTreino();
+      }
+    }
+
+    function escolherFinalizador(tipoCardio) {
+      alert(`Excelente! Inicie agora seu finalizador de ${tipoCardio}: 15 a 20 minutos em ritmo moderado para queima máxima de gordura!`);
+      encerrarTreinoCompleto();
+    }
+
+    function pularFinalizador() {
+      encerrarTreinoCompleto();
+    }
+
+    function CorporateConcluido() {
+      salvarFimTreino();
+      alert("Parabéns! Você concluiu seu treino com sucesso. Ótimo trabalho para sua composição corporal e saúde!");
+      voltarParaHoje();
+    }
+
+    function encerrarTreinoCompleto() {
+      CorporateConcluido();
+    }
+
+    // Inicialização da Aplicação
+    carregarHistorico();
+    renderizarLista();
+  </script>
+</body>
+</html>
